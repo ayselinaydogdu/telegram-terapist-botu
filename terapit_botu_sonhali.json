@@ -1,0 +1,134 @@
+{
+  "name": "terapit_botu_sonhali",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={\n  \"model\": \"gemini-2.5-flash\",\n  \"temperature\": 0.7,\n  \"max_tokens\": 200,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Sen empatik, destekleyici ve motive edici bir asistan/bot'sun. Kullanıcının mesajındaki ruh halini analiz ederek ona uygun bir yanıt ver. \\n\\nYanıtın yapısı şu şekilde olmalı:\\n\\n1. Önce onun duygusunu anlayan ve kabul eden sıcak bir cümle yaz.\\n2. Ardından, cesaret verici bir cümle ekle (gerekirse bir minik öneri).\\n3. Yanıtlar çok uzun olmamalı, 2-3 cümle yeterli.\\n\\nTonlama kuralları:\\n- Üzgünse: Nazik ve umut verici konuş.\\n- Stresliyse: Güven verici ve motive edici konuş.\\n- Kararsızsa: Netlik ve cesaret kazandırmaya odaklan.\\n- Mutluysa: Kutlayıcı ve enerji dolu bir yanıt ver.\\n- Nötrse: Hafif pozitif ve destekleyici bir ton kullan.\\n\\nYanıtta emoji olabilir ama aşırıya kaçma. Samimi ama profesyonel kal.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Kullanıcının mesajı:{{ $json.message.text }} \"\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1344,
+        128
+      ],
+      "id": "9d543959-15e4-454c-b19b-8665de7d177d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        320
+      ],
+      "id": "2b3482a7-ebad-428f-a58e-dfb004269d2e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Lwbm9iT2WcPDDYWX",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1712,
+        128
+      ],
+      "id": "40c4f1e5-4232-463e-8b29-5ae985bbdd89",
+      "name": "Telegram Trigger",
+      "webhookId": "d73c9cf3-4619-4eab-82e0-3add8f2d24ef",
+      "credentials": {
+        "telegramApi": {
+          "id": "5x0AKNCK20YQY9kN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -944,
+        128
+      ],
+      "id": "a9ee258b-fb93-46b0-b9f4-82e3216d9776",
+      "name": "Send a text message",
+      "webhookId": "91e2167b-dcd7-470e-8434-13a6457bb22e",
+      "credentials": {
+        "telegramApi": {
+          "id": "5x0AKNCK20YQY9kN",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0b056742-7ac0-4b14-9bee-c73cc37db17b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "95a478486fda7b50494514fce56f035926b911c03e7e62020442b366abdf9db9"
+  },
+  "id": "rSNHGbfYsJejdO2m",
+  "tags": []
+}
